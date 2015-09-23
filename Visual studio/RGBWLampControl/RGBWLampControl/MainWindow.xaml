@@ -1,0 +1,19 @@
+﻿<Window x:Name="RGBW_Lamp_control_app" x:Class="RGBWLampControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RGBWLampControl"
+        mc:Ignorable="d"
+        Title="RGBW Lamp control app" Height="600" Width="800" Background="Black" ResizeMode="CanMinimize" Icon="100px_RGB_color_wheel_36.svg.png">
+    <Grid Background="#FF1F1F1F">
+        <Button x:Name="button" Content="Connect" HorizontalAlignment="Left" Margin="72,45,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
+        <TextBlock x:Name="StatusBlock" HorizontalAlignment="Left" Margin="10,545,0,0" TextWrapping="Wrap" Text="{Binding Path=Status, NotifyOnTargetUpdated=True}" VerticalAlignment="Top" Width="201" Foreground="White"/>
+        <Slider x:Name="HueSlider" HorizontalAlignment="Left" Margin="10,299,0,0" VerticalAlignment="Top" Width="542" Maximum="36000" SmallChange="1" ValueChanged="SliderValueUpdate"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="557,299,0,0" TextWrapping="Wrap" Text="{Binding ElementName=HueSlider, Path=Value}" VerticalAlignment="Top" Foreground="White"/>
+        <Slider x:Name="SaturationSlider" HorizontalAlignment="Left" Margin="10,320,0,0" VerticalAlignment="Top" Width="542" Maximum="1000" SmallChange="1" ValueChanged="SliderValueUpdate"/>
+        <TextBlock x:Name="textBlock_Copy" HorizontalAlignment="Left" Margin="557,320,0,0" TextWrapping="Wrap" Text="{Binding Value, ElementName=SaturationSlider}" VerticalAlignment="Top" Foreground="White"/>
+        <Slider x:Name="BrightnessSlider" HorizontalAlignment="Left" Margin="10,341,0,0" VerticalAlignment="Top" Width="542" Maximum="1000" SmallChange="1" ValueChanged="SliderValueUpdate"/>
+        <TextBlock x:Name="textBlock_Copy1" HorizontalAlignment="Left" Margin="557,341,0,0" TextWrapping="Wrap" Text="{Binding Value, ElementName=BrightnessSlider}" VerticalAlignment="Top" Foreground="White"/>
+    </Grid>
+</Window>
