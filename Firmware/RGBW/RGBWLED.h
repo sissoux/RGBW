@@ -14,6 +14,11 @@ class RGBWLED
     char RedPin, GreenPin, BluePin, WhitePin;
     char _Resolution = 16;
     float _PWMFrequency = 150;
+  
+  private:
+    float H_a, H_b, S_a, S_b, I_a, I_b;   //Linear interpolation parameters for fading
+    uint8_t IsFadeRunning;
+    uint32_t Tzero = 0;
 
   public:
     float R, G, B, W, _hue, _saturation, _intensity;
