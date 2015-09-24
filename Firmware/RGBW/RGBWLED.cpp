@@ -75,3 +75,38 @@ void RGBWLED::begin(void) {
   analogWriteResolution(_Resolution);
 }
 
+int RGBWLED::fade(float H, float S, float I, uint16_t Duration)
+{
+  if (!IsFadeRunning)     //If we are not fading yet, we store current color value to calculate "fading path" 
+  {
+    IsFadeRunning = 1;
+    Tzero = millis();
+    
+    H_a = (H-_hue)/Duration;
+    H_b = _hue;
+    S_a = (S - _saturation)/Duration;
+    S_b = _saturation;
+    I_a = (I - _intensity)/Duration;
+    I_b = _intensity;
+  }
+  uint32_t t = millis();
+  if (t-Tzero < Duration)
+  {
+    _hue = H_a * t + H_b;
+    _saturation = S_a * t + S_b;
+    _intensity = I_a * t + I_b;
+    displayColor();
+    return 0;
+  }
+  else 
+  {
+    _hue = H;
+    _saturation = S;
+    _intensity = I;
+    displayColor();
+    
+    IsFadeRunning = false;
+    return 1;
+  }
+}
+
