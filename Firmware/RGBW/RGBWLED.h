@@ -17,11 +17,11 @@ class RGBWLED
   
   private:
     float H_a, H_b, S_a, S_b, I_a, I_b;   //Linear interpolation parameters for fading
-    uint8_t IsFadeRunning;
     uint32_t Tzero = 0;
 
   public:
     float R, G, B, W, _hue, _saturation, _intensity;
+    uint8_t IsFadeRunning;
 
     RGBWLED(char RPin, char GPin, char BPin, char WPin, char Resolution, float PWMFrequency);
     void begin();
