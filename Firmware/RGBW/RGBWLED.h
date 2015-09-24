@@ -36,6 +36,7 @@ class RGBWLED
     
     void displayColor(void);
     void displayRGBWColor();
+    uint8_t fade(float H, float S, float I, uint16_t Duration);
 };
 
 #endif
