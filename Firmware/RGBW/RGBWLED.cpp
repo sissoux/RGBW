@@ -82,19 +82,19 @@ int RGBWLED::fade(float H, float S, float I, uint16_t Duration)
     IsFadeRunning = 1;
     Tzero = millis();
     
-    H_a = (H-_hue)/Duration;
-    H_b = _hue;
+    H_a = (H - _hue)/Duration;    //Compute a for y = ax+b transformation
+    H_b = _hue;                   //Compute b for y = ax+b transformation
     S_a = (S - _saturation)/Duration;
     S_b = _saturation;
     I_a = (I - _intensity)/Duration;
     I_b = _intensity;
   }
-  uint32_t t = millis();
-  if (t-Tzero < Duration)
+  uint32_t t = millis()-Tzero;
+  if (t < Duration)
   {
-    _hue = H_a * t + H_b;
-    _saturation = S_a * t + S_b;
-    _intensity = I_a * t + I_b;
+    _hue = H_a * (float)t + H_b;
+    _saturation = S_a * (float)t + S_b;
+    _intensity = I_a * (float)t + I_b;
     displayColor();
     return 0;
   }
