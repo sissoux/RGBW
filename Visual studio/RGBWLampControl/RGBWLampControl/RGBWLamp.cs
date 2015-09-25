@@ -116,5 +116,17 @@ namespace RGBWLampControl
                 LampPort.Write(buffer,0,10);
             }
         }
+        public void fade()
+        {
+            if (LampPort.IsOpen)
+            {
+                byte[] buffer = new byte[4];
+                buffer[0] = (byte)'F';
+                buffer[1] = (byte)'A';
+                buffer[2] = (byte)'D';
+                buffer[3] = (byte)'E';
+                LampPort.Write(buffer, 0, 4);
+            }
+        }
     }
 }

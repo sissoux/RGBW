@@ -75,7 +75,7 @@ void RGBWLED::begin(void) {
   analogWriteResolution(_Resolution);
 }
 
-int RGBWLED::fade(float H, float S, float I, uint16_t Duration)
+uint8_t RGBWLED::fade(float H, float S, float I, uint16_t Duration)
 {
   if (!IsFadeRunning)     //If we are not fading yet, we store current color value to calculate "fading path" 
   {

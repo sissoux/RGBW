@@ -7,10 +7,14 @@ RGBWLED MyLED = RGBWLED(23, 22, 21, 20, 16, 150);
 uint32_t DisplayTimeCounter = 0;
 #define TEMPERATURE_RATE 2000
 uint32_t TempTimeCounter = 0;
+boolean FadeTrigger = false;
 
 boolean OpenedCom = false;
 int ByteCounter = 0;
 String Command = String();
+
+float Hue, Sat, Int;
+uint16_t Delay =10000;
 
 void setup()
 {
@@ -20,15 +24,19 @@ void setup()
   MyLED.begin();
   MyLED.setHue(0.0);
   MyLED.setSaturation(1.0);
-  MyLED.setIntensity(1.0);
+  MyLED.setIntensity(0.0);
   MyLED.displayColor();
 
   for ( int i = 0 ; i < 1000 ; i++)
   {
     MyLED.setIntensity((float)i / 1000.0);
     MyLED.displayColor();
-    delay(50);
+    delay(10);
   }
+  FadeTrigger = true;
+  Hue = 0;
+  Sat = 1;
+  Int = 1;
 }
 
 void loop()
@@ -76,7 +84,7 @@ void loop()
     }
     else if (Command == String("FADE"))
     {
-      MyLED.IsFadeRunning = 1;
+      FadeTrigger = 1;
       SerialDiscard();
     }
     else
@@ -129,10 +137,18 @@ void taskManager()
 
 void refreshDisplay()
 {
-  if (MyLED.IsFadeRunning)
+  if (MyLED.IsFadeRunning || FadeTrigger)
   {
-   MyLED.fade(60.0,1.0,0.6,3500);
+    FadeTrigger = false;
+    MyLED.fade(Hue,Sat,Int,Delay);
   }
-
+  if (!MyLED.IsFadeRunning)
+  {
+    FadeTrigger = true;
+    Hue = (float)random(0,36000)/100.0;
+    Sat = (float)random(0,1000)/1000.0;
+    Int = (float)random(0,1000)/1000.0;
+    Delay = random(4000,40000);
+  }
 }
 

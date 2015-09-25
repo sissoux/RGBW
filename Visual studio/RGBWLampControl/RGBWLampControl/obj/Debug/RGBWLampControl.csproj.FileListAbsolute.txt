@@ -15,3 +15,19 @@ R:\Mes documents\Projets\RGBW Lamp\Visual studio\RGBWLampControl\RGBWLampControl
 R:\Mes documents\Projets\RGBW Lamp\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\App.baml
 R:\Mes documents\Projets\RGBW Lamp\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\MesControles.baml
 R:\Mes documents\Projets\RGBW Lamp\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\GeneratedInternalTypeHelper.g.cs
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\bin\Debug\RGBWLampControl.exe.config
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.exe
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.pdb
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\bin\Debug\RGBWLampControl.exe
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\bin\Debug\RGBWLampControl.pdb
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.csprojResolveAssemblyReference.cache
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\MainWindow.g.cs
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\App.g.cs
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl_MarkupCompile.cache
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl_MarkupCompile.lref
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\App.baml
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\MainWindow.baml
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\MesControles.baml
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.g.resources
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.Properties.Resources.resources
+C:\Users\alexi\Documents\GitHub\RGBW\Visual studio\RGBWLampControl\RGBWLampControl\obj\Debug\RGBWLampControl.csproj.GenerateResource.Cache

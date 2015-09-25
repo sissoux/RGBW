@@ -79,5 +79,10 @@ namespace RGBWLampControl
             Slider TempSlider = sender as Slider;
             MyLamp.writeHSI((int)HueSlider.Value, (int)SaturationSlider.Value, (int)BrightnessSlider.Value);
         }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            MyLamp.fade();
+        }
     }
 }
