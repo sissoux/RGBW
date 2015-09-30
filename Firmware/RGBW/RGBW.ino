@@ -20,6 +20,7 @@ void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  Serial1.begin(9600);  //Bluetooth socket
   //while(!Serial);
   MyLED.begin();
   MyLED.setHue(0.0);
@@ -42,6 +43,10 @@ void setup()
 void loop()
 {
   taskManager();
+  if (Serial1.available())  //Simple function to check bluetooth connection
+  {
+    Serial.print(Serial1.read());
+  }
   if (Serial.available())
   {
     
