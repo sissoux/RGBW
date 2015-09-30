@@ -19,9 +19,9 @@ uint16_t Delay =10000;
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(115200);
-  Serial1.begin(9600);  //Bluetooth socket
-  //while(!Serial);
+  Serial2.begin(115200);
+  Serial1.begin(115200);
+  //while(!Serial2);
   MyLED.begin();
   MyLED.setHue(0.0);
   MyLED.setSaturation(1.0);
@@ -32,9 +32,9 @@ void setup()
   {
     MyLED.setIntensity((float)i / 1000.0);
     MyLED.displayColor();
-    delay(10);
+    //delay(10);
   }
-  FadeTrigger = true;
+  FadeTrigger = false;
   Hue = 0;
   Sat = 1;
   Int = 1;
@@ -43,11 +43,7 @@ void setup()
 void loop()
 {
   taskManager();
-  if (Serial1.available())  //Simple function to check bluetooth connection
-  {
-    Serial.print(Serial1.read());
-  }
-  if (Serial.available())
+  if (Serial2.available())
   {
     
     Command = getCommand();
@@ -55,15 +51,15 @@ void loop()
     
     if (Command == String("RGBW"))
     {
-      Serial.print("WBGR");
+      Serial2.print("WBGR");
       OpenedCom = true;
     }
-    else if (Command == String("SHSI") && Serial.available())
+    else if (Command == String("SHSI") && Serial2.available())
     {
       byte Buffer[6];
       while (ByteCounter < 6)
       {
-        Buffer[ByteCounter] = Serial.read();
+        Buffer[ByteCounter] = Serial2.read();
         ByteCounter++;
       }
       MyLED.setHue((float)(Buffer[0] + (Buffer[1] << 8)) / 100.0);
@@ -71,14 +67,14 @@ void loop()
       MyLED.setIntensity((float)(Buffer[4] + (Buffer[5] << 8)) / 1000.0);
       MyLED.displayColor();
       ByteCounter = 0;
-      SerialDiscard();
+      Serial2Discard();
     }
     else if (Command == String("SRGB"))
     {
       byte Buffer[8];
-      while (Serial.available() && ByteCounter < 8)
+      while (Serial2.available() && ByteCounter < 8)
       {
-        Buffer[ByteCounter] = (byte)Serial.read();
+        Buffer[ByteCounter] = (byte)Serial2.read();
       }
       MyLED.R = (float)(Buffer[0] + Buffer[1] << 8);
       MyLED.G = (float)(Buffer[2] + Buffer[3] << 8);
@@ -90,11 +86,15 @@ void loop()
     else if (Command == String("FADE"))
     {
       FadeTrigger = 1;
-      SerialDiscard();
+      Serial2Discard();
+    Hue = (float)random(0,36000)/100.0;
+    Sat = (float)random(0,1000)/1000.0;
+    Int = (float)random(0,1000)/1000.0;
+    Delay = random(4000,40000);
     }
     else
     {
-      SerialDiscard();
+      Serial2Discard();
     }
   Command = String("Null");
   }
@@ -103,20 +103,21 @@ void loop()
 
 
 
-void SerialDiscard()
+void Serial2Discard()
 {
-  while (Serial.available())
+  while (Serial2.available())
   {
-    Serial.read();
+    Serial2.read();
   }
 }
 
 String getCommand()
 {
   String Buffer = String();
-  while (Serial.available() && ByteCounter < 4)
+  delay(3000);
+  while (Serial2.available() && ByteCounter < 4)
   {
-    Buffer = Buffer + (char)Serial.read();
+    Buffer = Buffer + (char)Serial2.read();
     ByteCounter++;
   }
   ByteCounter = 0;
@@ -134,9 +135,9 @@ void taskManager()
   if ( (Now - TempTimeCounter) >= TEMPERATURE_RATE)
   {
     TempTimeCounter = Now;
-  Serial.print("Temperature: ");
-  Serial.print(map(analogRead(A0),0,1023,0,3300));
-  Serial.println(" mV");
+  Serial2.print("Temperature: ");
+  Serial2.print(map(analogRead(A0),0,1023,0,3300));
+  Serial2.println(" mV");
   }
 }
 
