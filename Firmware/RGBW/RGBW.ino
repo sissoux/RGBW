@@ -26,9 +26,7 @@ void setup()
 {
   // put your setup code here, to run once:
   SERIAL.begin(115200);          //Open Bluetooth "Serial Socket"
-  
   init();
-  
   FadeTrigger = false;
 }
 
@@ -44,7 +42,7 @@ void init()
   {
     MyLED.setIntensity((float)i / 1000.0);
     MyLED.displayColor();
-    //delay(10);
+    delay(10);
   }
 }
 
@@ -61,6 +59,7 @@ void loop()
     {
       AppCmdTimeoutCounter = 0;
       OpenedCom = true;
+      MyLED.IsFadeRunning = 0;
       SERIAL.print("WBGR");
     }
     else if (Command == String("SHSI") && SERIAL.available())   // Static HSI direct color display
