@@ -1,65 +1,76 @@
 #include "RGBWLED.h"
+#include "elapsedMillis.h"
 
 //                      R  G   B   W  res frequency
 RGBWLED MyLED = RGBWLED(23, 22, 21, 20, 16, 150);
 
-#define REFRESH_RATE 20// ms
-uint32_t DisplayTimeCounter = 0;
-#define TEMPERATURE_RATE 2000
-uint32_t TempTimeCounter = 0;
-boolean FadeTrigger = false;
+#define SERIAL Serial
+
+#define REFRESH_RATE 20             // ms
+elapsedMillis DisplayTimeCounter;    
+#define TEMPERATURE_RATE 2000       // For debugging
+elapsedMillis TempTimeCounter;
+#define APP_CMD_TIMEOUT 10000       // Define delay before continuing standalone mode
+elapsedMillis AppCmdTimeoutCounter;
+
+boolean FadeTrigger = false;        // Set this variable will launch a fading to the specifier Hue Sat Int
+float Hue, Sat, Int;
+uint16_t Delay =10000;
 
 boolean OpenedCom = false;
 int ByteCounter = 0;
 String Command = String();
 
-float Hue, Sat, Int;
-uint16_t Delay =10000;
 
 void setup()
 {
   // put your setup code here, to run once:
-  Serial2.begin(115200);
-  Serial1.begin(115200);
-  //while(!Serial2);
-  MyLED.begin();
+  SERIAL.begin(115200);          //Open Bluetooth "Serial Socket"
+  
+  init();
+  
+  FadeTrigger = false;
+}
+
+void init()
+{
+  MyLED.begin();                  //Init MyLED Instance
   MyLED.setHue(0.0);
   MyLED.setSaturation(1.0);
   MyLED.setIntensity(0.0);
   MyLED.displayColor();
 
-  for ( int i = 0 ; i < 1000 ; i++)
+  for ( int i = 0 ; i < 1000 ; i++)       
   {
     MyLED.setIntensity((float)i / 1000.0);
     MyLED.displayColor();
     //delay(10);
   }
-  FadeTrigger = false;
-  Hue = 0;
-  Sat = 1;
-  Int = 1;
 }
 
 void loop()
 {
-  taskManager();
-  if (Serial2.available())
+  taskManager();                                  //What needs to be done regularly ?
+  if (SERIAL.available())                     
   {
     
-    Command = getCommand();
+    Command = getCommand();                       //If data is present in input buffer we get Header
     //delay(10);
     
-    if (Command == String("RGBW"))
+    if (Command == String("RGBW"))                //If header is RGBW We send back WBGR to aknowledge and set the OpenedCom flag + reset timeout counter
     {
-      Serial2.print("WBGR");
+      AppCmdTimeoutCounter = 0;
       OpenedCom = true;
+      SERIAL.print("WBGR");
     }
-    else if (Command == String("SHSI") && Serial2.available())
+    else if (Command == String("SHSI") && SERIAL.available())   // Static HSI direct color display
     {
+      AppCmdTimeoutCounter = 0;
+      OpenedCom = 1;
       byte Buffer[6];
       while (ByteCounter < 6)
       {
-        Buffer[ByteCounter] = Serial2.read();
+        Buffer[ByteCounter] = SERIAL.read();
         ByteCounter++;
       }
       MyLED.setHue((float)(Buffer[0] + (Buffer[1] << 8)) / 100.0);
@@ -69,12 +80,14 @@ void loop()
       ByteCounter = 0;
       Serial2Discard();
     }
-    else if (Command == String("SRGB"))
+    else if (Command == String("SRGB"))                 //Static RGB Direct color display
     {
+      AppCmdTimeoutCounter = 0;
+      OpenedCom = 1;
       byte Buffer[8];
-      while (Serial2.available() && ByteCounter < 8)
+      while (SERIAL.available() && ByteCounter < 8)
       {
-        Buffer[ByteCounter] = (byte)Serial2.read();
+        Buffer[ByteCounter] = (byte)SERIAL.read();
       }
       MyLED.R = (float)(Buffer[0] + Buffer[1] << 8);
       MyLED.G = (float)(Buffer[2] + Buffer[3] << 8);
@@ -83,14 +96,29 @@ void loop()
       MyLED.displayRGBWColor();
       ByteCounter = 0;
     }
-    else if (Command == String("FADE"))
+    else if (Command == String("FADE"))                 //Fade display from current color to specified HSI Value
     {
+      AppCmdTimeoutCounter = 0;
+      OpenedCom = 1;
+      uint8_t Buffer[8];
+      while (ByteCounter < 8)
+      {
+        Buffer[ByteCounter] = SERIAL.read();
+        ByteCounter++;
+      }
+      Hue = ((float)(Buffer[0] + (Buffer[1] << 8)) / 100.0);
+      Sat = ((float)(Buffer[2] + (Buffer[3] << 8)) / 1000.0);
+      Int = ((float)(Buffer[4] + (Buffer[5] << 8)) / 1000.0);
+      Delay = (uint16_t)(Buffer[6] + (Buffer[7] << 8));
+      ByteCounter = 0;
       FadeTrigger = 1;
       Serial2Discard();
-    Hue = (float)random(0,36000)/100.0;
-    Sat = (float)random(0,1000)/1000.0;
-    Int = (float)random(0,1000)/1000.0;
-    Delay = random(4000,40000);
+    }
+    else if (Command == String("TICK"))             // App shall send reccurent data to avoid "AppTimeout" and back to Standalone
+    {
+      AppCmdTimeoutCounter = 0;
+      OpenedCom = 1;
+      Serial2Discard();
     }
     else
     {
@@ -105,39 +133,46 @@ void loop()
 
 void Serial2Discard()
 {
-  while (Serial2.available())
+  while (SERIAL.available())
   {
-    Serial2.read();
+    SERIAL.read();
   }
 }
 
 String getCommand()
 {
   String Buffer = String();
+  
+#ifdef WAIT4INPUT
   delay(3000);
-  while (Serial2.available() && ByteCounter < 4)
+#endif
+
+  while (SERIAL.available() && ByteCounter < 4)       //We capture the Header. Data aquisition will be done during CMD execution
   {
-    Buffer = Buffer + (char)Serial2.read();
+    Buffer = Buffer + (char)SERIAL.read();
     ByteCounter++;
   }
   ByteCounter = 0;
-  return Buffer;
+  return Buffer;                                      //Return supposed header
 }
 
 void taskManager()
 {
-  uint32_t Now = millis();
-  if ( (Now - DisplayTimeCounter) >= REFRESH_RATE)
+  if ( DisplayTimeCounter >= REFRESH_RATE)
   {
-    DisplayTimeCounter = Now;
+    DisplayTimeCounter = 0;
     refreshDisplay();
   }
-  if ( (Now - TempTimeCounter) >= TEMPERATURE_RATE)
+  if (false)  //TempTimeCounter >= TEMPERATURE_RATE)
   {
-    TempTimeCounter = Now;
-  Serial2.print("Temperature: ");
-  Serial2.print(map(analogRead(A0),0,1023,0,3300));
-  Serial2.println(" mV");
+    TempTimeCounter = 0;
+    SERIAL.print("Temperature: ");
+    SERIAL.print(map(analogRead(A0),0,1023,0,3300));
+    SERIAL.println(" mV");
+  }
+  if (AppCmdTimeoutCounter >= APP_CMD_TIMEOUT)
+  {
+    OpenedCom = 0;
   }
 }
 
@@ -148,7 +183,7 @@ void refreshDisplay()
     FadeTrigger = false;
     MyLED.fade(Hue,Sat,Int,Delay);
   }
-  if (!MyLED.IsFadeRunning)
+  if (!MyLED.IsFadeRunning && !OpenedCom)
   {
     FadeTrigger = true;
     Hue = (float)random(0,36000)/100.0;
