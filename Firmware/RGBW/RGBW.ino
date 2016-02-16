@@ -1,92 +1,62 @@
 #include "RGBWLED.h"
-#include "elapsedMillis.h"
 
 //                      R  G   B   W  res frequency
-RGBWLED MyLED = RGBWLED(23, 22, 21, 20, 16, 150);
+RGBWLED MyLED = RGBWLED(6, 22, 23, 9, 16, 150);
 
-#define SERIAL Serial
-
-#define REFRESH_RATE 20             // ms
-elapsedMillis DisplayTimeCounter;    
-#define TEMPERATURE_RATE 2000       // For debugging
-elapsedMillis TempTimeCounter;
-#define APP_CMD_TIMEOUT 10000       // Define delay before continuing standalone mode
-elapsedMillis AppCmdTimeoutCounter;
-
-boolean FadeTrigger = false;        // Set this variable will launch a fading to the specifier Hue Sat Int
-float Hue, Sat, Int;
-uint16_t Delay =10000;
 
 boolean OpenedCom = false;
 int ByteCounter = 0;
-String Command = String();
-
 
 void setup()
 {
   // put your setup code here, to run once:
-  SERIAL.begin(115200);          //Open Bluetooth "Serial Socket"
-  init();
-  FadeTrigger = false;
-}
-
-void init()
-{
-  MyLED.begin();                  //Init MyLED Instance
+  Serial3.begin(115200);
+  //while(!Serial3);
+  MyLED.begin();
   MyLED.setHue(0.0);
-  MyLED.setSaturation(1.0);
-  MyLED.setIntensity(0.0);
+  MyLED.setSaturation(0.0);
+  MyLED.setIntensity(1.0);
   MyLED.displayColor();
 
-  for ( int i = 0 ; i < 1000 ; i++)       
+  for ( int i = 0 ; i < 1000 ; i++)
   {
     MyLED.setIntensity((float)i / 1000.0);
     MyLED.displayColor();
-    delay(10);
+    delay(50);
   }
 }
 
 void loop()
 {
-  taskManager();                                  //What needs to be done regularly ?
-  if (SERIAL.available())                     
+  if (Serial3.available())
   {
     
-    Command = getCommand();                       //If data is present in input buffer we get Header
-    //delay(10);
+    String Command = getCommand();
     
-    if (Command == String("RGBW"))                //If header is RGBW We send back WBGR to aknowledge and set the OpenedCom flag + reset timeout counter
+    if (Command == String("RGBW"))
     {
-      AppCmdTimeoutCounter = 0;
+      Serial3.print("WBGR");
       OpenedCom = true;
-      MyLED.IsFadeRunning = 0;
-      SERIAL.print("WBGR");
     }
-    else if (Command == String("SHSI") && SERIAL.available())   // Static HSI direct color display
+    else if (Command == String("SHSI"))
     {
-      AppCmdTimeoutCounter = 0;
-      OpenedCom = 1;
       byte Buffer[6];
-      while (ByteCounter < 6)
+      while (Serial3.available() && ByteCounter < 6)
       {
-        Buffer[ByteCounter] = SERIAL.read();
-        ByteCounter++;
+        Buffer[ByteCounter] = Serial3.read();
       }
-      MyLED.setHue((float)(Buffer[0] + (Buffer[1] << 8)) / 100.0);
-      MyLED.setSaturation((float)(Buffer[2] + (Buffer[3] << 8)) / 1000.0);
-      MyLED.setIntensity((float)(Buffer[4] + (Buffer[5] << 8)) / 1000.0);
+      MyLED.setHue((float)(Buffer[0] + Buffer[1] << 8) / 100.0);
+      MyLED.setSaturation((float)(Buffer[2] + Buffer[3] << 8) / 100.0);
+      MyLED.setIntensity((float)(Buffer[4] + Buffer[5] << 8) / 100.0);
       MyLED.displayColor();
       ByteCounter = 0;
-      Serial2Discard();
     }
-    else if (Command == String("SRGB"))                 //Static RGB Direct color display
+    else if (Command == String("SRGB"))
     {
-      AppCmdTimeoutCounter = 0;
-      OpenedCom = 1;
       byte Buffer[8];
-      while (SERIAL.available() && ByteCounter < 8)
+      while (Serial3.available() && ByteCounter < 8)
       {
-        Buffer[ByteCounter] = (byte)SERIAL.read();
+        Buffer[ByteCounter] = Serial3.read();
       }
       MyLED.R = (float)(Buffer[0] + Buffer[1] << 8);
       MyLED.G = (float)(Buffer[2] + Buffer[3] << 8);
@@ -95,100 +65,33 @@ void loop()
       MyLED.displayRGBWColor();
       ByteCounter = 0;
     }
-    else if (Command == String("FADE"))                 //Fade display from current color to specified HSI Value
-    {
-      AppCmdTimeoutCounter = 0;
-      OpenedCom = 1;
-      uint8_t Buffer[8];
-      while (ByteCounter < 8)
-      {
-        Buffer[ByteCounter] = SERIAL.read();
-        ByteCounter++;
-      }
-      Hue = ((float)(Buffer[0] + (Buffer[1] << 8)) / 100.0);
-      Sat = ((float)(Buffer[2] + (Buffer[3] << 8)) / 1000.0);
-      Int = ((float)(Buffer[4] + (Buffer[5] << 8)) / 1000.0);
-      Delay = (uint16_t)(Buffer[6] + (Buffer[7] << 8));
-      ByteCounter = 0;
-      FadeTrigger = 1;
-      Serial2Discard();
-    }
-    else if (Command == String("TICK"))             // App shall send reccurent data to avoid "AppTimeout" and back to Standalone
-    {
-      AppCmdTimeoutCounter = 0;
-      OpenedCom = 1;
-      Serial2Discard();
-    }
     else
     {
-      Serial2Discard();
+      Serial3Discard();
     }
-  Command = String("Null");
   }
 }
 
 
 
 
-void Serial2Discard()
+void Serial3Discard()
 {
-  while (SERIAL.available())
+  while (Serial3.available())
   {
-    SERIAL.read();
+    Serial3.read();
   }
 }
 
 String getCommand()
 {
   String Buffer = String();
-  
-#ifdef WAIT4INPUT
-  delay(3000);
-#endif
-
-  while (SERIAL.available() && ByteCounter < 4)       //We capture the Header. Data aquisition will be done during CMD execution
+  while (Serial3.available() && ByteCounter < 4)
   {
-    Buffer = Buffer + (char)SERIAL.read();
+    Buffer = Buffer + (char)Serial3.read();
     ByteCounter++;
   }
   ByteCounter = 0;
-  return Buffer;                                      //Return supposed header
-}
-
-void taskManager()
-{
-  if ( DisplayTimeCounter >= REFRESH_RATE)
-  {
-    DisplayTimeCounter = 0;
-    refreshDisplay();
-  }
-  if (false)  //TempTimeCounter >= TEMPERATURE_RATE)
-  {
-    TempTimeCounter = 0;
-    SERIAL.print("Temperature: ");
-    SERIAL.print(map(analogRead(A0),0,1023,0,3300));
-    SERIAL.println(" mV");
-  }
-  if (AppCmdTimeoutCounter >= APP_CMD_TIMEOUT)
-  {
-    OpenedCom = 0;
-  }
-}
-
-void refreshDisplay()
-{
-  if (MyLED.IsFadeRunning || FadeTrigger)
-  {
-    FadeTrigger = false;
-    MyLED.fade(Hue,Sat,Int,Delay);
-  }
-  if (!MyLED.IsFadeRunning && !OpenedCom)
-  {
-    FadeTrigger = true;
-    Hue = (float)random(0,36000)/100.0;
-    Sat = (float)random(0,1000)/1000.0;
-    Int = (float)random(0,1000)/1000.0;
-    Delay = random(4000,40000);
-  }
+  return Buffer;
 }
 

@@ -14,14 +14,9 @@ class RGBWLED
     char RedPin, GreenPin, BluePin, WhitePin;
     char _Resolution = 16;
     float _PWMFrequency = 150;
-  
-  private:
-    float H_a, H_b, S_a, S_b, I_a, I_b;   //Linear interpolation parameters for fading
-    uint32_t Tzero = 0;
 
   public:
     float R, G, B, W, _hue, _saturation, _intensity;
-    uint8_t IsFadeRunning;
 
     RGBWLED(char RPin, char GPin, char BPin, char WPin, char Resolution, float PWMFrequency);
     void begin();
@@ -36,7 +31,6 @@ class RGBWLED
     
     void displayColor(void);
     void displayRGBWColor();
-    uint8_t fade(float H, float S, float I, uint16_t Duration);
 };
 
 #endif
